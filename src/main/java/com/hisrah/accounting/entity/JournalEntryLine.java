@@ -1,5 +1,7 @@
 package com.hisrah.accounting.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,6 +24,16 @@ public class JournalEntryLine {
 	@JoinColumn(name = "account_id", nullable = false)
 	private Account account;
 
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "journal_entry_id", nullable = false)
+	private JournalEntry journalEntry;
+
+	@Column(name = "debit_amount", nullable = false, precision = 19, scale = 2)
+	private BigDecimal debitAmount = BigDecimal.ZERO;
+
+	@Column(name = "credit_amount", nullable = false, precision = 19, scale = 2)
+	private BigDecimal creditAmount = BigDecimal.ZERO;
+
 	@Column(nullable = false)
 	private boolean posted = false;
 
@@ -39,6 +51,30 @@ public class JournalEntryLine {
 
 	public void setAccount(Account account) {
 		this.account = account;
+	}
+
+	public JournalEntry getJournalEntry() {
+		return journalEntry;
+	}
+
+	public void setJournalEntry(JournalEntry journalEntry) {
+		this.journalEntry = journalEntry;
+	}
+
+	public BigDecimal getDebitAmount() {
+		return debitAmount;
+	}
+
+	public void setDebitAmount(BigDecimal debitAmount) {
+		this.debitAmount = debitAmount;
+	}
+
+	public BigDecimal getCreditAmount() {
+		return creditAmount;
+	}
+
+	public void setCreditAmount(BigDecimal creditAmount) {
+		this.creditAmount = creditAmount;
 	}
 
 	public boolean isPosted() {

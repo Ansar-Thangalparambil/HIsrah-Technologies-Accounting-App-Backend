@@ -31,6 +31,16 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage(), null));
 	}
 
+	@ExceptionHandler(ForbiddenException.class)
+	public ResponseEntity<ApiResponse<Void>> handleForbidden(ForbiddenException ex) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error(ex.getMessage(), null));
+	}
+
+	@ExceptionHandler(UnprocessableEntityException.class)
+	public ResponseEntity<ApiResponse<Void>> handleUnprocessable(UnprocessableEntityException ex) {
+		return ResponseEntity.unprocessableEntity().body(ApiResponse.error(ex.getMessage(), null));
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = ex.getBindingResult()

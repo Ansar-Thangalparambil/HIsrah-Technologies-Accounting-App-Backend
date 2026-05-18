@@ -7,10 +7,10 @@ Spring Boot REST API implementation for HISRAH Accounting assessment.
 This repository implements:
 
 - Task 1: Chart of Accounts Management API (completed)
-- Task 2: Manual Journal Entry (planned)
+- Task 2: Manual Journal Entry API (completed)
 - Task 3: Financial Reporting (planned)
 
-Current status: Task 1 is implemented with validation, hierarchy support, soft deactivation logic, tests, and Swagger UI.
+Current status: Task 1 and Task 2 are implemented with validations, workflow rules, tests, and Swagger UI grouping.
 
 ## 2) Technology Stack
 
@@ -146,26 +146,71 @@ When startup succeeds, you will see: `Started AccountingApplication`.
 ### 6.1 Swagger (Beginner Friendly)
 
 1. Open `http://localhost:8080/swagger-ui/index.html`
-2. Expand `Account Controller`
-3. Click `Try it out`
-4. Enter payload
-5. Click `Execute`
-6. Verify response code and response JSON
+2. Expand `Task 1 - Chart of Accounts` for Task 1 APIs
+3. Expand `Task 2 - Manual Journal Entry` for Task 2 APIs
+4. Click `Try it out`
+5. Enter payload
+6. Click `Execute`
+7. Verify response code and response JSON
 
-### 6.2 Postman Quick Test Order
+### 6.2 How To Identify Task 1 vs Task 2
 
-1. `POST /api/accounts` (create root)
-2. `POST /api/accounts` (create child)
-3. `GET /api/accounts`
-4. `GET /api/accounts/{id}`
-5. `PUT /api/accounts/{id}`
-6. `GET /api/accounts/tree`
-7. `PATCH /api/accounts/{id}/deactivate`
-8. `PATCH /api/accounts/{id}/activate`
+- Task 1 URLs start with: `/api/accounts`
+- Task 2 URLs start with: `/api/journal-entries`
+- Swagger groups them separately using tags:
+  - `Task 1 - Chart of Accounts`
+  - `Task 2 - Manual Journal Entry`
+- Additional beginner guide: `docs/task-navigation-guide.md`
 
-## 7) Sample cURL Commands
+## 7) Task 2: Manual Journal Entry API
 
-Create root:
+### 7.1 Implemented Endpoints (9/9)
+
+- `POST /api/journal-entries` - Create draft journal entry
+- `GET /api/journal-entries` - List journal entries
+- `GET /api/journal-entries/{id}` - Get journal entry by id
+- `PUT /api/journal-entries/{id}` - Edit draft/rejected entry
+- `DELETE /api/journal-entries/{id}` - Delete draft entry
+- `PATCH /api/journal-entries/{id}/submit` - DRAFT -> PENDING_APPROVAL
+- `PATCH /api/journal-entries/{id}/approve` - PENDING_APPROVAL -> APPROVED
+- `PATCH /api/journal-entries/{id}/reject` - PENDING_APPROVAL -> REJECTED
+- `PATCH /api/journal-entries/{id}/reverse` - APPROVED -> REVERSED + mirror entry
+
+### 7.2 Business Rules Implemented
+
+- Double-entry balance rule (`422` if debit total != credit total)
+- Minimum 2 lines per entry
+- Each line has either debit or credit, not both
+- Amounts non-negative and max 2 decimal places
+- accountId must exist and be active
+- entryDate cannot exceed today + 1 day
+- entryDate cannot be in simulated locked periods
+- Four-eyes rule: creator cannot approve own entry (`403`)
+- Only DRAFT entries can be deleted
+- Only DRAFT/REJECTED entries can be edited
+- Approved entries cannot return to DRAFT/PENDING
+- referenceNo auto format `JE-YYYYMMDD-NNNN`
+- Reversal creates approved mirror entry linked by `reversalOf`
+
+## 8) Postman Quick Test Order
+
+### Task 1
+
+1. `POST /api/accounts`
+2. `GET /api/accounts`
+3. `GET /api/accounts/tree`
+
+### Task 2
+
+1. `POST /api/journal-entries`
+2. `PUT /api/journal-entries/{id}`
+3. `PATCH /api/journal-entries/{id}/submit`
+4. `PATCH /api/journal-entries/{id}/approve`
+5. `PATCH /api/journal-entries/{id}/reverse`
+
+## 9) Sample cURL Commands
+
+Task 1 create root:
 
 ```bash
 curl -X POST http://localhost:8080/api/accounts \
@@ -173,27 +218,23 @@ curl -X POST http://localhost:8080/api/accounts \
   -d '{"code":"1000","name":"Assets","type":"ASSET","parentId":null}'
 ```
 
-Create child:
+Task 2 create journal entry:
 
 ```bash
-curl -X POST http://localhost:8080/api/accounts \
+curl -X POST http://localhost:8080/api/journal-entries \
   -H "Content-Type: application/json" \
-  -d '{"code":"1110","name":"Bank Account","type":"ASSET","parentId":1}'
+  -d '{
+    "entryDate":"2026-05-18",
+    "description":"Office expense",
+    "createdBy":"ansar",
+    "lines":[
+      {"accountId":1,"debitAmount":100.00,"creditAmount":0.00},
+      {"accountId":2,"debitAmount":0.00,"creditAmount":100.00}
+    ]
+  }'
 ```
 
-Get tree:
-
-```bash
-curl http://localhost:8080/api/accounts/tree
-```
-
-Deactivate:
-
-```bash
-curl -X PATCH http://localhost:8080/api/accounts/1/deactivate
-```
-
-## 8) Testing
+## 10) Testing
 
 Run tests:
 
@@ -204,8 +245,9 @@ Run tests:
 Current unit tests:
 
 - `AccountServiceTest` (6 test methods)
+- `JournalEntryServiceTest` (4 test methods)
 
-## 9) Git Workflow (Systematic, From Local to GitHub)
+## 11) Git Workflow (Systematic, From Local to GitHub)
 
 ### 9.1 First-Time Repository Setup
 
@@ -231,7 +273,7 @@ git push -u origin main
 - `docs(readme): add setup and API testing instructions`
 - `test(task1): add service unit tests for rules`
 
-## 10) Submission Checklist
+## 12) Submission Checklist
 
 - [x] Application runs with one command
 - [x] Task 1 endpoints implemented
@@ -240,10 +282,10 @@ git push -u origin main
 - [x] Unit tests added
 - [x] Swagger UI added
 - [x] README with setup and API examples
-- [ ] Task 2 implementation
+- [x] Task 2 implementation
 - [ ] Task 3 implementation
 
-## 11) Project Structure
+## 13) Project Structure
 
 ```text
 src/main/java/com/hisrah/accounting
@@ -257,7 +299,7 @@ src/main/java/com/hisrah/accounting
   └─ config
 ```
 
-## 12) Notes
+## 14) Notes
 
 - If API returns `404`, stop existing process and run:
   - `.\mvnw.cmd clean spring-boot:run`

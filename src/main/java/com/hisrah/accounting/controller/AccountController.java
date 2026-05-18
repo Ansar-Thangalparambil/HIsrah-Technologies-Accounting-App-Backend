@@ -21,6 +21,9 @@ import com.hisrah.accounting.dto.response.AccountTreeResponse;
 import com.hisrah.accounting.dto.response.ApiResponse;
 import com.hisrah.accounting.service.AccountService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "Task 1 - Chart of Accounts")
 @RestController
 @RequestMapping("/api/accounts")
 public class AccountController {
