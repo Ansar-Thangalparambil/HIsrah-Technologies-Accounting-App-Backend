@@ -38,7 +38,12 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(UnprocessableEntityException.class)
 	public ResponseEntity<ApiResponse<Void>> handleUnprocessable(UnprocessableEntityException ex) {
-		return ResponseEntity.unprocessableEntity().body(ApiResponse.error(ex.getMessage(), null));
+		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiResponse.error(ex.getMessage(), null));
+	}
+
+	@ExceptionHandler(IllegalStateException.class)
+	public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(IllegalStateException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(ex.getMessage(), null));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

@@ -8,9 +8,9 @@ This repository implements:
 
 - Task 1: Chart of Accounts Management API (completed)
 - Task 2: Manual Journal Entry API (completed)
-- Task 3: Financial Reporting (planned)
+- Task 3: Financial Reporting API (completed)
 
-Current status: Task 1 and Task 2 are implemented with validations, workflow rules, tests, and Swagger UI grouping.
+Current status: Task 1, Task 2, and Task 3 are implemented with validations, workflow rules, reporting endpoints, tests, and Swagger UI grouping.
 
 ## 2) Technology Stack
 
@@ -148,19 +148,26 @@ When startup succeeds, you will see: `Started AccountingApplication`.
 1. Open `http://localhost:8080/swagger-ui/index.html`
 2. Expand `Task 1 - Chart of Accounts` for Task 1 APIs
 3. Expand `Task 2 - Manual Journal Entry` for Task 2 APIs
-4. Click `Try it out`
-5. Enter payload
-6. Click `Execute`
-7. Verify response code and response JSON
+4. Expand `Task 3 - Financial Reporting` for Task 3 APIs
+5. Click `Try it out`
+6. Enter payload
+7. Click `Execute`
+8. Verify response code and response JSON
 
 ### 6.2 How To Identify Task 1 vs Task 2
 
 - Task 1 URLs start with: `/api/accounts`
 - Task 2 URLs start with: `/api/journal-entries`
+- Task 3 URLs start with: `/api/v1/reports`
 - Swagger groups them separately using tags:
   - `Task 1 - Chart of Accounts`
   - `Task 2 - Manual Journal Entry`
-- Additional beginner guide: `docs/task-navigation-guide.md`
+  - `Task 3 - Financial Reporting`
+- Additional beginner guides: `docs/task-navigation-guide.md`, `docs/task-files-by-task.md` (full file list per task)
+- Submission text for PDF placeholders: `docs/submission-sections-filled.md`
+- Interview notes: `docs/interview-viva-notes.md`
+- Final audit checklist: `docs/final-audit-checklist.md`
+- Postman collection: `docs/postman/hisrah-accounting-collection.json`
 
 ## 7) Task 2: Manual Journal Entry API
 
@@ -208,7 +215,40 @@ When startup succeeds, you will see: `Started AccountingApplication`.
 4. `PATCH /api/journal-entries/{id}/approve`
 5. `PATCH /api/journal-entries/{id}/reverse`
 
-## 9) Sample cURL Commands
+### Task 3
+
+1. `GET /api/v1/reports/trial-balance?dateFrom=2026-01-01&dateTo=2026-12-31`
+2. `GET /api/v1/reports/profit-loss?dateFrom=2026-01-01&dateTo=2026-12-31`
+3. `GET /api/v1/reports/general-ledger?accountId=1&dateFrom=2026-01-01&dateTo=2026-12-31`
+
+## 9) Task 3: Financial Reporting API
+
+### 9.1 Implemented Endpoints (3/3)
+
+- `GET /api/v1/reports/trial-balance`
+- `GET /api/v1/reports/profit-loss`
+- `GET /api/v1/reports/general-ledger`
+
+### 9.2 Implemented Reporting Rules
+
+- Only APPROVED journal entries are included in all reports
+- Trial Balance:
+  - Supports `dateFrom`, `dateTo`, `includeZeroBalance`
+  - Calculates `totalDebits`, `totalCredits`, `netBalance` per account
+  - Validates grand total debits equals grand total credits
+- Profit & Loss:
+  - Revenue = credit - debit for REVENUE accounts
+  - Total Expenses = debit - credit for EXPENSE accounts
+  - COGS = expense movement for account codes `5000-5999`
+  - Gross Profit = Revenue - COGS
+  - Net Profit = Revenue - Total Expenses
+  - Expense rows grouped under parent account subtotal
+- General Ledger:
+  - Account-specific approved lines in date range
+  - Opening balance before `dateFrom`
+  - Movement and running balance per line
+
+## 10) Sample cURL Commands
 
 Task 1 create root:
 
@@ -234,7 +274,13 @@ curl -X POST http://localhost:8080/api/journal-entries \
   }'
 ```
 
-## 10) Testing
+Task 3 trial balance:
+
+```bash
+curl "http://localhost:8080/api/v1/reports/trial-balance?dateFrom=2026-01-01&dateTo=2026-12-31&includeZeroBalance=false"
+```
+
+## 11) Testing
 
 Run tests:
 
@@ -247,9 +293,9 @@ Current unit tests:
 - `AccountServiceTest` (6 test methods)
 - `JournalEntryServiceTest` (4 test methods)
 
-## 11) Git Workflow (Systematic, From Local to GitHub)
+## 12) Git Workflow (Systematic, From Local to GitHub)
 
-### 9.1 First-Time Repository Setup
+### 12.1 First-Time Repository Setup
 
 ```powershell
 git init
@@ -257,7 +303,7 @@ git branch -M main
 git remote add origin <your-github-repo-url>
 ```
 
-### 9.2 Daily Commit Flow
+### 12.2 Daily Commit Flow
 
 ```powershell
 git status
@@ -266,14 +312,16 @@ git commit -m "Implement Task 1 Chart of Accounts API with validation and tests"
 git push -u origin main
 ```
 
-### 9.3 Suggested Commit Message Pattern
+### 12.3 Suggested Commit Message Pattern
 
 - `feat(task1): add account CRUD and hierarchy endpoints`
 - `fix(task1): enforce depth validation for subtree re-parenting`
 - `docs(readme): add setup and API testing instructions`
 - `test(task1): add service unit tests for rules`
+- `feat(task2): add manual journal entry workflow and reversal`
+- `feat(task3): add trial balance profit-loss and general ledger reports`
 
-## 12) Submission Checklist
+## 13) Submission Checklist
 
 - [x] Application runs with one command
 - [x] Task 1 endpoints implemented
@@ -283,9 +331,9 @@ git push -u origin main
 - [x] Swagger UI added
 - [x] README with setup and API examples
 - [x] Task 2 implementation
-- [ ] Task 3 implementation
+- [x] Task 3 implementation
 
-## 13) Project Structure
+## 14) Project Structure
 
 ```text
 src/main/java/com/hisrah/accounting
@@ -299,7 +347,7 @@ src/main/java/com/hisrah/accounting
   └─ config
 ```
 
-## 14) Notes
+## 15) Notes
 
 - If API returns `404`, stop existing process and run:
   - `.\mvnw.cmd clean spring-boot:run`

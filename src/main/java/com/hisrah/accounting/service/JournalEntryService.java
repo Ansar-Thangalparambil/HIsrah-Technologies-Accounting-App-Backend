@@ -27,7 +27,6 @@ import com.hisrah.accounting.exception.ForbiddenException;
 import com.hisrah.accounting.exception.NotFoundException;
 import com.hisrah.accounting.exception.UnprocessableEntityException;
 import com.hisrah.accounting.repository.AccountRepository;
-import com.hisrah.accounting.repository.JournalEntryLineRepository;
 import com.hisrah.accounting.repository.JournalEntryRepository;
 
 @Service
@@ -40,16 +39,13 @@ public class JournalEntryService {
 	);
 
 	private final JournalEntryRepository journalEntryRepository;
-	private final JournalEntryLineRepository journalEntryLineRepository;
 	private final AccountRepository accountRepository;
 
 	public JournalEntryService(
 		JournalEntryRepository journalEntryRepository,
-		JournalEntryLineRepository journalEntryLineRepository,
 		AccountRepository accountRepository
 	) {
 		this.journalEntryRepository = journalEntryRepository;
-		this.journalEntryLineRepository = journalEntryLineRepository;
 		this.accountRepository = accountRepository;
 	}
 
